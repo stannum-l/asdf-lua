@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-echo "bin"
+echo "bin luarocks/bin"

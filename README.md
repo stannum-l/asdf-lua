@@ -1,6 +1,8 @@
 <div align="center">
 
-# asdf-lua [![Build](https://github.com/stannum-l/asdf-lua/actions/workflows/build.yml/badge.svg)](<https://github.com/>stannum-l/asdf-lua/actions/workflows/build.yml) [![Lint](https://github.com/stannum-l/asdf-lua/actions/workflows/lint.yml/badge.svg)](<https://github.com/>stannum-l/asdf-lua/actions/workflows/lint.yml)
+# asdf-lua
+
+[![Build](https://github.com/stannum-l/asdf-lua/actions/workflows/build.yml/badge.svg)](https://github.com/stannum-l/asdf-lua/actions/workflows/build.yml) [![Lint](https://github.com/stannum-l/asdf-lua/actions/workflows/lint.yml/badge.svg)](https://github.com/stannum-l/asdf-lua/actions/workflows/lint.yml)
 
 [lua](<TOOL HOMEPAGE>) plugin for the [asdf version manager](https://asdf-vm.com).
 
