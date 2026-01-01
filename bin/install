@@ -8,4 +8,149 @@ plugin_dir=$(dirname "$(dirname "$current_script_path")")
 # shellcheck source=./lib/utils.bash
 source "${plugin_dir}/lib/utils.bash"
 
-install_version "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+install_version() {
+  local install_type="$1"
+  local version="$2"
+  local install_path="${3%/bin}"
+  local download_path="$4"
+  local temp_dl_dir=""
+
+  if [ -z "$download_path" ]; then
+    if [ "${TMPDIR:-}" = "" ]; then
+      temp_dl_dir="$(mktemp -d -t asdf-${TOOL_NAME}-)"
+    else
+      temp_dl_dir="${TMPDIR%/}"
+    fi
+  else
+    temp_dl_dir="$download_path"
+  fi
+
+  # Running this in a subshell because we don't to disturb the current working directory.
+  (
+    cd "$(dirname "$download_path")/$version"
+    target_os="$(get_target_os)"
+
+    make "$target_os" || exit 1
+    make test || exit 1
+    make local || exit 1
+
+    echo "$TOOL_NAME $version installation was successful!"
+
+    mkdir -p "$install_path"
+    cp -r install/* "$install_path" || exit 1
+
+    # We will install luarocks as well
+    lua_rocks_version="${LUAROCKS_VERSION:-$(get_latest_lua_rocks_version)}"
+    lua_rocks_source_path="$(get_lua_rocks_download_file_path "$install_type" "$lua_rocks_version" "$temp_dl_dir")"
+    download_lua_rocks_source "$install_type" "$lua_rocks_version" "$lua_rocks_source_path"
+
+    cd "$(dirname "$lua_rocks_source_path")" || exit 1
+    local source_dir
+    source_dir=$(untar_lua_rocks_path "$install_type" "$lua_rocks_version" "$temp_dl_dir")
+    tar zxf "$lua_rocks_source_path" || exit 1
+    cd "$source_dir"
+
+    local lua_rocks_configure_options=()
+    while IFS='' read -r line; do
+      lua_rocks_configure_options+=("$line")
+    done < <(construct_lua_rocks_configure_options)
+
+    # set in os_based_configure_options
+    # we unset it here because echo-ing changes the return value of the function
+    unset ASDF_PKG_MISSING
+
+    printf "Building luarocks with options:"
+    printf " %q" "${lua_rocks_configure_options[@]}"
+    printf "\n"
+
+    ./configure "${lua_rocks_configure_options[@]}" || exit 1
+
+    make bootstrap || exit 1
+    # the install leaves some references to the build dir; remove them:
+    local file
+    for file in "$ASDF_INSTALL_PATH"/luarocks/bin/{luarocks,luarocks-admin}; do
+      # this is the path entry that we want to remove
+      local pattern="${source_dir}/src/?.lua;"
+      local replacement=""
+      local contents
+      IFS='' read -r -d '' contents <"$file" || true
+      truncate -c -s 0 "$file"
+      printf "%s" "${contents//$pattern/$replacement}" >>"$file"
+    done
+  )
+}
+
+construct_lua_rocks_configure_options() {
+  if [[ ${LUAROCKS_CONFIGURE_OPTIONS-} == "" ]]; then
+    local lua_include_path=""
+    if [[ $OSTYPE == "darwin"* ]] && [[ -z ${MACOSX_DEPLOYMENT_TARGET-} ]]; then
+      lua_include_path="$(find "$install_path"/include -depth 1)"
+    else
+      # shellcheck disable=SC2034
+      lua_include_path="$(find "$install_path"/include -mindepth 1 -maxdepth 1)"
+    fi
+    local configure_options=(
+      --prefix="$install_path/luarocks"
+      --with-lua="$install_path"
+      --with-lua-include="$install_path/include"
+      --with-lua-lib="$install_path/lib"
+    )
+    # shellcheck disable=SC2206
+    configure_options+=(
+      ${LUAROCKS_EXTRA_CONFIGURE_OPTIONS-}
+    )
+  else
+    # shellcheck disable=SC2206
+    local configure_options=(
+      ${LUAROCKS_CONFIGURE_OPTIONS-}
+    )
+
+    configure_options+=("PREFIX=$install_path")
+  fi
+
+  printf "%s\n" "${configure_options[@]}"
+}
+
+untar_lua_rocks_path() {
+  local install_type=$1
+  local version=$2
+  local tmp_download_dir=$3
+
+  echo "$tmp_download_dir/luarocks-${version}"
+}
+
+download_lua_rocks_source() {
+  local install_type=$1
+  local version=$2
+  local download_path=$3
+  local download_url
+  download_url=$(get_lua_rocks_download_url "$install_type" "$version")
+
+  curl -Lo "$download_path" -C - "$download_url"
+}
+
+get_lua_rocks_download_file_path() {
+  local install_type=$1
+  local version=$2
+  local tmp_download_dir=$3
+  local pkg_name="luarocks-${version}.tar.gz"
+
+  echo "$tmp_download_dir/$pkg_name"
+}
+
+get_lua_rocks_download_url() {
+  local install_type=$1
+  local version=$2
+  echo "https://github.com/luarocks/luarocks/archive/refs/tags/v$version.tar.gz"
+}
+
+get_latest_lua_rocks_version() {
+  local curl_opts=(-fsSL)
+  if [[ -n ${GITHUB_API_TOKEN:-} ]]; then
+    curl_opts=("${curl_opts[@]}" -H "Authorization: token ${GITHUB_API_TOKEN}")
+  fi
+  curl "${curl_opts[@]}" "https://api.github.com/repos/luarocks/luarocks/tags?per_page=1&page=1" |
+    grep '"name"' | cut -d\" -f4 | cut -c2-
+}
+
+install_version "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH" "$ASDF_DOWNLOAD_PATH"

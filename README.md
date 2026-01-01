@@ -1,8 +1,8 @@
 <div align="center">
 
-# asdf-<YOUR TOOL> [![Build](https://github.com/<YOUR GITHUB USERNAME>/asdf-<YOUR TOOL>/actions/workflows/build.yml/badge.svg)](https://github.com/<YOUR GITHUB USERNAME>/asdf-<YOUR TOOL>/actions/workflows/build.yml) [![Lint](https://github.com/<YOUR GITHUB USERNAME>/asdf-<YOUR TOOL>/actions/workflows/lint.yml/badge.svg)](https://github.com/<YOUR GITHUB USERNAME>/asdf-<YOUR TOOL>/actions/workflows/lint.yml)
+# asdf-lua [![Build](https://github.com/stannum-l/asdf-lua/actions/workflows/build.yml/badge.svg)](<https://github.com/>stannum-l/asdf-lua/actions/workflows/build.yml) [![Lint](https://github.com/stannum-l/asdf-lua/actions/workflows/lint.yml/badge.svg)](<https://github.com/>stannum-l/asdf-lua/actions/workflows/lint.yml)
 
-[<YOUR TOOL>](<TOOL HOMEPAGE>) plugin for the [asdf version manager](https://asdf-vm.com).
+[lua](<TOOL HOMEPAGE>) plugin for the [asdf version manager](https://asdf-vm.com).
 
 </div>
 
@@ -25,24 +25,24 @@
 Plugin:
 
 ```shell
-asdf plugin add <YOUR TOOL>
+asdf plugin add lua
 # or
-asdf plugin add <YOUR TOOL> https://github.com/<YOUR GITHUB USERNAME>/asdf-<YOUR TOOL>.git
+asdf plugin add lua https://github.com/stannum-l/asdf-lua.git
 ```
 
-<YOUR TOOL>:
+lua:
 
 ```shell
 # Show all installable versions
-asdf list-all <YOUR TOOL>
+asdf list-all lua
 
 # Install specific version
-asdf install <YOUR TOOL> latest
+asdf install lua latest
 
 # Set a version globally (on your ~/.tool-versions file)
-asdf global <YOUR TOOL> latest
+asdf global lua latest
 
-# Now <YOUR TOOL> commands are available
+# Now lua commands are available
 <TOOL CHECK>
 ```
 
@@ -53,8 +53,8 @@ install & manage versions.
 
 Contributions of any kind welcome! See the [contributing guide](contributing.md).
 
-[Thanks goes to these contributors](https://github.com/<YOUR GITHUB USERNAME>/asdf-<YOUR TOOL>/graphs/contributors)!
+[Thanks goes to these contributors](<<https://github.com/stannum-l/asdf-lua/graphs/contributors>)!
 
 # License
 
-See [LICENSE](LICENSE) © [<YOUR NAME>](https://github.com/<YOUR GITHUB USERNAME>/)
+See [LICENSE](LICENSE) © [Stannum-l](<<https://github.com/stannum-l/>)

@@ -2,73 +2,67 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for <YOUR TOOL>.
-GH_REPO="<TOOL REPO>"
-TOOL_NAME="<YOUR TOOL>"
-TOOL_TEST="<TOOL CHECK>"
+# GH_REPO="https://github.com/lua/lua"
+DOWNLOAD_URL="https://www.lua.org/ftp/"
+TOOL_NAME="lua"
 
 fail() {
-	echo -e "asdf-$TOOL_NAME: $*"
-	exit 1
+  echo -e "asdf-$TOOL_NAME: $*"
+  exit 1
 }
 
 curl_opts=(-fsSL)
 
-# NOTE: You might want to remove this if <YOUR TOOL> is not hosted on GitHub releases.
+# NOTE: You might want to remove this if lua is not hosted on GitHub releases.
 if [ -n "${GITHUB_API_TOKEN:-}" ]; then
-	curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
+  curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
 fi
 
 sort_versions() {
-	sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
-		LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
+  sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
+    LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
 }
 
-list_github_tags() {
-	git ls-remote --tags --refs "$GH_REPO" |
-		grep -o 'refs/tags/.*' | cut -d/ -f3- |
-		sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
+# list_github_tags() {
+#     git ls-remote --tags --refs --sort="v:refname" "$GH_REPO" |
+#     grep -o 'refs/tags/.*' | cut -d/ -f3- | grep '^v' |
+#     sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
+# }
+
+list_lua_versions() {
+  curl -s "$DOWNLOAD_URL" | grep -o 'lua-[0-9.]*.tar.gz' | sed 's/lua-//' | sed 's/.tar.gz//' | sort -V | uniq
 }
 
 list_all_versions() {
-	# TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-	# Change this function if <YOUR TOOL> has other means of determining installable versions.
-	list_github_tags
+  # list_github_tags
+  list_lua_versions
 }
 
 download_release() {
-	local version filename url
-	version="$1"
-	filename="$2"
+  local version filename url
+  version="$1"
+  filename="$2"
 
-	# TODO: Adapt the release URL convention for <YOUR TOOL>
-	url="$GH_REPO/archive/v${version}.tar.gz"
+  # TODO: Adapt the release URL convention for lua
+  url="$DOWNLOAD_URL/lua-$version.tar.gz"
 
-	echo "* Downloading $TOOL_NAME release $version..."
-	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
+  echo "* Downloading $TOOL_NAME release $version..."
+  curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
-install_version() {
-	local install_type="$1"
-	local version="$2"
-	local install_path="${3%/bin}/bin"
+get_target_os() {
+  case "$(uname -s)" in
+  Darwin) echo "macosx" ;;
+  Linux) echo "linux" ;;
+  *) fail "Unsupported OS: $(uname -s)" ;;
+  esac
+}
 
-	if [ "$install_type" != "version" ]; then
-		fail "asdf-$TOOL_NAME supports release installs only"
-	fi
-
-	(
-		mkdir -p "$install_path"
-		cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
-
-		# TODO: Assert <YOUR TOOL> executable exists.
-		local tool_cmd
-		tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
-		test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
-
-		echo "$TOOL_NAME $version installation was successful!"
-	) || (
-		rm -rf "$install_path"
-		fail "An error occurred while installing $TOOL_NAME $version."
-	)
+get_target_arch() {
+  case "$(uname -m)" in
+  x86_64) echo "x86_64" ;;
+  aarch64) echo "aarch64" ;;
+  arm64) echo "arm64" ;;
+  *) fail "Unsupported architecture: $(uname -m)" ;;
+  esac
 }
