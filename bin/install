@@ -177,7 +177,7 @@ write_pkg_config() {
   echo '' >>$prefix/lib/pkgconfig/lua.pc
   echo 'Name: Lua' >>$prefix/lib/pkgconfig/lua.pc
   echo 'Description: An Extensible Extension Language' >>$prefix/lib/pkgconfig/lua.pc
-  echo 'Version: 5.4.8' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'Version: '$version >>$prefix/lib/pkgconfig/lua.pc
   echo 'Requires:' >>$prefix/lib/pkgconfig/lua.pc
   echo 'Libs: -L${libdir} -llua -lm' >>$prefix/lib/pkgconfig/lua.pc
   echo 'Cflags: -I${includedir}' >>$prefix/lib/pkgconfig/lua.pc
