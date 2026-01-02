@@ -4,7 +4,7 @@
 
 [![Build](https://github.com/stannum-l/asdf-lua/actions/workflows/build.yml/badge.svg)](https://github.com/stannum-l/asdf-lua/actions/workflows/build.yml) [![Lint](https://github.com/stannum-l/asdf-lua/actions/workflows/lint.yml/badge.svg)](https://github.com/stannum-l/asdf-lua/actions/workflows/lint.yml)
 
-[lua](<TOOL HOMEPAGE>) plugin for the [asdf version manager](https://asdf-vm.com).
+[lua](https://www.lua.org/home.html) plugin for the [asdf version manager](https://asdf-vm.com).
 
 </div>
 
@@ -16,8 +16,6 @@
 - [License](#license)
 
 # Dependencies
-
-**TODO: adapt this section**
 
 - `bash`, `curl`, `tar`, and [POSIX utilities](https://pubs.opengroup.org/onlinepubs/9699919799/idx/utilities.html).
 - `SOME_ENV_VAR`: set this environment variable in your shell config to load the correct version of tool x.
@@ -45,7 +43,7 @@ asdf install lua latest
 asdf global lua latest
 
 # Now lua commands are available
-<TOOL CHECK>
+lua -v
 ```
 
 Check [asdf](https://github.com/asdf-vm/asdf) readme for more instructions on how to
@@ -55,7 +53,7 @@ install & manage versions.
 
 Contributions of any kind welcome! See the [contributing guide](contributing.md).
 
-[Thanks goes to these contributors](<<https://github.com/stannum-l/asdf-lua/graphs/contributors>)!
+[Thanks goes to these contributors](https://github.com/stannum-l/asdf-lua/graphs/contributors)!
 
 # License
 

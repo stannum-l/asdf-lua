@@ -43,7 +43,6 @@ download_release() {
   version="$1"
   filename="$2"
 
-  # TODO: Adapt the release URL convention for lua
   url="$DOWNLOAD_URL/lua-$version.tar.gz"
 
   echo "* Downloading $TOOL_NAME release $version..."

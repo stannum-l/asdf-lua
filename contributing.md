@@ -5,8 +5,7 @@ Testing Locally:
 ```shell
 asdf plugin test <plugin-name> <plugin-url> [--asdf-tool-version <version>] [--asdf-plugin-gitref <git-ref>] [test-command*]
 
-# TODO: adapt this
-asdf plugin test lua https://github.com/stannum-l/asdf-lua.git "<TOOL CHECK>"
+asdf plugin test lua https://github.com/stannum-l/asdf-lua.git "lua -v"
 ```
 
 Tests are automatically run in GitHub Actions on push and PR.
