@@ -77,6 +77,9 @@ install_version() {
       truncate -c -s 0 "$file"
       printf "%s" "${contents//$pattern/$replacement}" >>"$file"
     done
+
+    mkdir -p "$install_path/lib/pkgconfig"
+    write_pkg_config "$install_path" "$version"
   )
 }
 
@@ -151,6 +154,39 @@ get_latest_lua_rocks_version() {
   fi
   curl "${curl_opts[@]}" "https://api.github.com/repos/luarocks/luarocks/tags?per_page=1&page=1" |
     grep '"name"' | cut -d\" -f4 | cut -c2-
+}
+
+write_pkg_config() {
+  local prefix=$1
+  local version=$2
+  # shellcheck disable=SC2155
+  local mmversion=$(remove_patch_version_from_semver "$version")
+
+  echo 'V= '$mmversion >$prefix/lib/pkgconfig/lua.pc
+  echo 'R= '$version >>$prefix/lib/pkgconfig/lua.pc
+  echo 'prefix='$prefix >>$prefix/lib/pkgconfig/lua.pc
+  echo 'INSTALL_BIN= ${prefix}/bin' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'INSTALL_INC= ${prefix}/include/lua' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'INSTALL_LIB= ${prefix}/lib' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'INSTALL_MAN= ${prefix}/share/man/man1' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'INSTALL_LMOD= ${prefix}/share/lua/${V}' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'INSTALL_CMOD= ${prefix}/lib/lua/${V}' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'exec_prefix=${prefix}' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'libdir=${exec_prefix}/lib' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'includedir=${prefix}/include/lua' >>$prefix/lib/pkgconfig/lua.pc
+  echo '' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'Name: Lua' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'Description: An Extensible Extension Language' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'Version: 5.4.8' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'Requires:' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'Libs: -L${libdir} -llua -lm' >>$prefix/lib/pkgconfig/lua.pc
+  echo 'Cflags: -I${includedir}' >>$prefix/lib/pkgconfig/lua.pc
+
+}
+
+remove_patch_version_from_semver() {
+  local version=$1
+  echo $version | sed 's/\.[0-9]*$//'
 }
 
 install_version "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH" "$ASDF_DOWNLOAD_PATH"
